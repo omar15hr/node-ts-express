@@ -1,3 +1,4 @@
+import { bcryptAdapter } from "../../config/bcrypt.adapter";
 import { User } from "../../data/mongo/models/user.model";
 import { RegisterUserDto } from "../../domain/dtos/auth/register-user.dto";
 import { UserEntity } from "../../domain/entities/user.entity";
@@ -12,6 +13,9 @@ export class AuthService {
 
     try {
       const user = await User.create(registerUserDto);
+
+      user.password = bcryptAdapter.hash(registerUserDto.password);
+
       await user.save();
 
       const { password, ...userEntity } = UserEntity.fromObject(user);
