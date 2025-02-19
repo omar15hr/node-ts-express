@@ -1,5 +1,6 @@
 import { User } from "../../data/mongo/models/user.model";
 import { RegisterUserDto } from "../../domain/dtos/auth/register-user.dto";
+import { UserEntity } from "../../domain/entities/user.entity";
 import { CustomError } from "../../domain/errors/custom.error";
 
 export class AuthService {
@@ -13,7 +14,13 @@ export class AuthService {
       const user = await User.create(registerUserDto);
       await user.save();
 
-      return user;
+      const { password, ...userEntity } = UserEntity.fromObject(user);
+
+      return {
+        user: userEntity,
+        token: 'todo token'
+      };
+
     } catch (error) {
       throw CustomError.internalServerError('Error registering user');
     }
