@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { RegisterUserDto } from "../../domain/dtos/auth/register-user.dto";
 import { AuthService } from "../services/auth.service";
 import { CustomError } from "../../domain/errors/custom.error";
+import { LoginUserDto } from "../../domain/dtos/auth/login-user.dto";
 
 export class AuthController {
   constructor(public readonly authService: AuthService) {}
@@ -25,7 +26,14 @@ export class AuthController {
   };
 
   loginUser = (req: Request, res: Response) => {
-    res.json("loginUser");
+    const [error, loginUserDto] = LoginUserDto.create(req.body);
+
+    if (error) return res.status(400).json({ error });
+
+    this.authService
+      .loginUser(loginUserDto!)
+      .then((user) => res.json(user))
+      .catch(error => this.handleError(error, res));
   };
 
   validateEmail = (req: Request, res: Response) => {

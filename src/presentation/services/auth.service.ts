@@ -1,5 +1,6 @@
 import { bcryptAdapter } from "../../config/bcrypt.adapter";
 import { User } from "../../data/mongo/models/user.model";
+import { LoginUserDto } from "../../domain/dtos/auth/login-user.dto";
 import { RegisterUserDto } from "../../domain/dtos/auth/register-user.dto";
 import { UserEntity } from "../../domain/entities/user.entity";
 import { CustomError } from "../../domain/errors/custom.error";
@@ -7,9 +8,9 @@ import { CustomError } from "../../domain/errors/custom.error";
 export class AuthService {
   constructor() {}
 
-  public async registerUser( registerUserDto: RegisterUserDto ) {
+  public async registerUser(registerUserDto: RegisterUserDto) {
     const existUser = await User.findOne({ email: registerUserDto.email });
-    if (existUser) throw CustomError.badRequest('Email already exists');
+    if (existUser) throw CustomError.badRequest("Email already exists");
 
     try {
       const user = await User.create(registerUserDto);
@@ -22,14 +23,29 @@ export class AuthService {
 
       return {
         user: userEntity,
-        token: 'todo token'
+        token: "todo token",
       };
-
     } catch (error) {
-      throw CustomError.internalServerError('Error registering user');
+      throw CustomError.internalServerError("Error registering user");
     }
+  }
 
-    return 'todo ok';
+  public async loginUser(loginUserDto: LoginUserDto) {
+    const user = await User.findOne({ email: loginUserDto.email });
 
+    if (!user) throw CustomError.badRequest("Email not found");
+
+    const isMatching = bcryptAdapter.compare(
+      loginUserDto.password,
+      user.password
+    );
+    if (!isMatching) throw CustomError.badRequest("Invalid password");
+
+    const { password, ...userEntity } = UserEntity.fromObject(user);
+
+    return {
+      user: userEntity,
+      token: "todo token",
+    };
   }
 }
