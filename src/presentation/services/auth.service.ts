@@ -1,4 +1,5 @@
 import { bcryptAdapter } from "../../config/bcrypt.adapter";
+import { JwtAdapter } from "../../config/jwt.adapter";
 import { User } from "../../data/mongo/models/user.model";
 import { LoginUserDto } from "../../domain/dtos/auth/login-user.dto";
 import { RegisterUserDto } from "../../domain/dtos/auth/register-user.dto";
@@ -43,9 +44,12 @@ export class AuthService {
 
     const { password, ...userEntity } = UserEntity.fromObject(user);
 
+    const token = await JwtAdapter.generateToken({ id: user.id });
+    if (!token) throw CustomError.internalServerError("Error generating token");
+
     return {
       user: userEntity,
-      token: "todo token",
+      token,
     };
   }
 }
