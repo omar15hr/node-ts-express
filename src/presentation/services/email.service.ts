@@ -1,4 +1,5 @@
-import nodemailer, { Transporter } from "nodemailer";
+import { Resend } from "resend";
+import { envs } from "../../config/envs";
 
 export interface SendMailOptions {
   to: string | string[];
@@ -13,37 +14,28 @@ export interface Attachement {
 }
 
 export class EmailService {
-  private transporter: Transporter;
+  private resend: Resend;
 
-  constructor(
-    mailerService: string,
-    mailerEmail: string,
-    senderEmailKey: string
-  ) {
-    this.transporter = nodemailer.createTransport({
-      service: mailerService,
-      auth: {
-        user: mailerEmail,
-        pass: senderEmailKey,
-      },
-    });
+  constructor(apiKey: string) {
+    this.resend = new Resend(apiKey);
   }
 
   async sendEmail(options: SendMailOptions): Promise<boolean> {
     const { to, subject, htmlBody, attachements = [] } = options;
 
     try {
-      const sentInformation = await this.transporter.sendMail({
-        to: to,
-        subject: subject,
+      const sentInformation = await this.resend.emails.send({
+        from: envs.MAILER_EMAIL,
+        to,
+        subject,
         html: htmlBody,
-        attachments: attachements,
       });
 
-      // console.log( sentInformation );
+      console.log('Email sent:', sentInformation);
 
       return true;
     } catch (error) {
+      console.error('Error sending email:', error);
       return false;
     }
   }

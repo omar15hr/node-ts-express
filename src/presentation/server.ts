@@ -1,5 +1,6 @@
 import express, { Router } from 'express';
 import path from 'path';
+import { envs } from '../config/envs';
 
 interface Options {
   port: number;
