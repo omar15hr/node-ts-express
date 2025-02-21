@@ -14,9 +14,9 @@ export class AuthController {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 
+
   registerUser = (req: Request, res: Response) => {
     const [error, registerUserDto] = RegisterUserDto.create(req.body);
-
     if (error) return res.status(400).json({ error });
 
     this.authService
@@ -25,9 +25,9 @@ export class AuthController {
       .catch(error => this.handleError(error, res));
   };
 
+
   loginUser = (req: Request, res: Response) => {
     const [error, loginUserDto] = LoginUserDto.create(req.body);
-
     if (error) return res.status(400).json({ error });
 
     this.authService
@@ -36,6 +36,7 @@ export class AuthController {
       .catch(error => this.handleError(error, res));
   };
 
+  
   validateEmail = (req: Request, res: Response) => {
     res.json("validateEmail");
   };

@@ -22,9 +22,13 @@ export class AuthService {
 
       const { password, ...userEntity } = UserEntity.fromObject(user);
 
+      const token = await JwtAdapter.generateToken({ id: user.id });
+      if (!token)
+        throw CustomError.internalServerError("Error generating token");
+
       return {
         user: userEntity,
-        token: "todo token",
+        token,
       };
     } catch (error) {
       throw CustomError.internalServerError("Error registering user");
@@ -44,7 +48,7 @@ export class AuthService {
 
     const { password, ...userEntity } = UserEntity.fromObject(user);
 
-    const token = await JwtAdapter.generateToken({ id: user.id, email: user.email });
+    const token = await JwtAdapter.generateToken({ id: user.id });
     if (!token) throw CustomError.internalServerError("Error generating token");
 
     return {
