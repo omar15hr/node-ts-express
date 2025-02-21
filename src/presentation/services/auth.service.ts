@@ -71,6 +71,7 @@ export class AuthService {
     const link = `${ envs.WEBSERVICE_URL }/auth/validate-email/${ token }`;
     const html = `
       <h1>Validate your email</h1>
+      <p>Thanks for registering in my project. This is for practical purposes only.</p>
       <p>Click <a href="${ link }">here</a> to validate your email</p>
 
       <span>Node and Express project</span>
