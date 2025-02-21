@@ -12,11 +12,10 @@ export class AuthRoutes {
       envs.MAILER_SERVICE,
       envs.MAILER_EMAIL,
       envs.MAILER_SECRET_KEY,
-      envs.SEND_EMAIL,
+      envs.SEND_EMAIL
     );
 
     const authService = new AuthService(emailService);
-
     const controller = new AuthController(authService);
 
     // Definir las rutas
