@@ -1,13 +1,17 @@
 import { bcryptAdapter } from "../../config/bcrypt.adapter";
+import { envs } from "../../config/envs";
 import { JwtAdapter } from "../../config/jwt.adapter";
 import { User } from "../../data/mongo/models/user.model";
 import { LoginUserDto } from "../../domain/dtos/auth/login-user.dto";
 import { RegisterUserDto } from "../../domain/dtos/auth/register-user.dto";
 import { UserEntity } from "../../domain/entities/user.entity";
 import { CustomError } from "../../domain/errors/custom.error";
+import { EmailService } from "./email.service";
 
 export class AuthService {
-  constructor() {}
+  constructor(
+    private readonly emailService: EmailService,
+  ) {}
 
   public async registerUser(registerUserDto: RegisterUserDto) {
     const existUser = await User.findOne({ email: registerUserDto.email });
@@ -19,6 +23,7 @@ export class AuthService {
       user.password = bcryptAdapter.hash(registerUserDto.password);
 
       await user.save();
+      this.sendEmailValidationLink(user.email);
 
       const { password, ...userEntity } = UserEntity.fromObject(user);
 
@@ -34,6 +39,7 @@ export class AuthService {
       throw CustomError.internalServerError("Error registering user");
     }
   }
+
 
   public async loginUser(loginUserDto: LoginUserDto) {
     const user = await User.findOne({ email: loginUserDto.email });
@@ -55,5 +61,28 @@ export class AuthService {
       user: userEntity,
       token,
     };
+  }
+
+
+  private sendEmailValidationLink = async (email: string) => {
+    const token = await JwtAdapter.generateToken({ email });
+    if (!token) throw CustomError.internalServerError("Error generating token");
+
+    const link = `${ envs.WEBSERVICE_URL }/auth/validate-email/${ token }`;
+    const html = `
+      <h1>Validate your email</h1>
+      <p>Click <a href="${ link }">here</a> to validate your email</p>
+
+      <span>Node and Express project</span>
+    `;
+
+    const options = {
+      to: email,
+      subject: "Validate your email",
+      htmlBody: html,
+    };
+
+    const isSet = await this.emailService.sendEmail(options);
+    if (!isSet) throw CustomError.internalServerError("Error sending email");
   }
 }
