@@ -1,4 +1,7 @@
 import { NextFunction, Request, Response } from "express";
+import { JwtAdapter } from "../../config/jwt.adapter";
+import { User } from "../../data/mongo/models/user.model";
+import { UserEntity } from "../../domain/entities/user.entity";
 
 export class AuthMiddleware {
   static async validateJWT(req: Request, res: Response, next: NextFunction) {
@@ -10,6 +13,15 @@ export class AuthMiddleware {
     const token = authorization.split(' ').at(1) || '';
 
     try {
+
+      const payload = await JwtAdapter.validateToken<{ id: string }>(token);
+      if (!payload) return res.status(401).json({ error: 'Invalid token' });
+
+      const user = await User.findById(payload.id);
+      if (!user) return res.status(401).json({ error: 'Invalid token - user' });
+
+      req.body.user = UserEntity.fromObject(user);
+      next();
       
     } catch (error) {
       console.log(error);
