@@ -31,12 +31,9 @@ export class CategoryController {
 
     if (error) return res.status(400).json({ error });
 
-    res.json(paginationDto);
-
-
-    // this.categoryService.getCategories()
-    //   .then( categories => res.status(200).json(categories) )
-    //   .catch( error => this.handleError(error, res) );
+    this.categoryService.getCategories( paginationDto! )
+      .then( categories => res.status(200).json(categories) )
+      .catch( error => this.handleError(error, res) );
   }
 
   updateCategory = async (req: Request, res: Response) => {
