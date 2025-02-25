@@ -25,7 +25,9 @@ export class CategoryController {
   }
 
   getCategories = async (req: Request, res: Response) => {
-    res.json('getCategories');
+    this.categoryService.getCategories()
+      .then( categories => res.status(200).json(categories) )
+      .catch( error => this.handleError(error, res) );
   }
 
   updateCategory = async (req: Request, res: Response) => {
